@@ -18,7 +18,7 @@ Both are definitely a [Linear congruential generator](https://en.wikipedia.org/w
 
 ## Capsule IDs
 
-When getting an capsule from the capsule machine, items have the following internal IDs:
+When getting an capsule from the capsule machine, capsules have the following internal IDs:
 
 - 00 = Mushroom
 - 01 = Super Mushroom
@@ -64,7 +64,7 @@ When getting an capsule from the capsule machine, items have the following inter
 - 29 = ERROR CAPSULE (DEBUG)
 - 2A = ERROR CAPSULE
 
-Obtaining an item with an item ID over 2A results in a soft lock.
+Obtaining an capsule with a capsule ID over 2A results in a soft lock.
 
 ![2B Or Higher Softlock](/img/2b_or_higher_softlock.PNG?raw=true "2B Or Higher Softlock")
 
@@ -80,18 +80,104 @@ If you use it on yourself it crashes the game. If you throw it though...
 
 ![Error Capsule Throw](/img/error_capsule.GIF?raw=true "Error Capsule Throw")
 
-The items labeled `ERROR CAPSULE (DEBUG)` are capsules used for debugging the game. They have actual models but don't appear to do anything.
+The capsules labeled `ERROR CAPSULE (DEBUG)` are capsules used for debugging the game. They have actual models but don't appear to do anything.
 
 ![Debug Capsule](/img/error_0x29.PNG?raw=true "Debug Capsule")
 
 ## Capsule Randomness
 
-When you come to a capsule machine, you get a random capsule. The item ID you get is returned from the the result of calling the function `FUN_800c8fa0` at `0x800c0cb0`.
+When you come to a capsule machine, you get a random capsule. The capsule ID you get is returned from the the result of calling the function `FUN_800c8fa0` at `0x800c0cb0`.
 
 I've began documenting the function here: [random_capsule.c](https://gist.github.com/NicholasMoser/02b477cd16e1d5ea1ba6e8c4cea1333e)
 
-My current understanding is that it iterates through every capsule in the game, and adds **some**[1] of those items to a list. It then iterates through that list of items **5 times** and swaps the current item in the iteration with a random other item in the list. It will not swap if the random other item happens to match the current item. Therefore, anywhere between 0 and `number of items in the list` swaps will occur.
+Capsules in the game are grouped by buckets. Before the game picks which capsule you'll get, it first picks which bucket it will choose from. I've [mapped each capsule to each bucket here](https://gist.github.com/NicholasMoser/5beafc9a00269b64469eb7f176990dbb), but have included a summary of the buckets below:
 
-Once the swaps are complete, a random capsule is grabbed from the list. Each item in the list has an equal chance of being grabbed.
+### Bucket A (0x41)
 
-[1] I have yet to determine how it decides which items to add. It is doing some comparison against game data, but it's not clear what it represents yet.
+- Mushroom
+- Cursed Mushroom
+- Warp Pipe
+- Hammer Bro
+- Coin Block
+- Koopa Bank
+
+### Bucket B (0x42)
+
+- Super Mushroom
+- Klepto
+- Spiny
+- Bomb-omb
+- Kamek
+- Piranha Plant
+- Lakitu
+
+### Bucket C (0x43)
+
+- Bubble
+- Goomba
+- Mr. Blizzard
+- Magikoopa
+- Ukiki
+- Bone
+- Bowser
+
+### Bucket D (0x44)
+
+- Paratroopa
+- Tweester
+- Duel
+- Chain Chomp
+
+### Bucket E (0x45)
+
+- Wiggler
+- Bullet Bill
+- Chance
+- Miracle
+
+### Gecko Codes
+
+To prove the existence of these buckets, you can use the following Gecko codes for a specific Bucket ID to **always** be used:
+
+Always use Bucket A (0x41)
+
+```hex
+C20C9280 00000001
+3A600041 00000000
+```
+
+Always use Bucket B (0x42)
+
+```hex
+C20C9280 00000001
+3A600042 00000000
+```
+
+Always use Bucket C (0x43)
+
+```hex
+C20C9280 00000001
+3A600043 00000000
+```
+
+Always use Bucket D (0x44)
+
+```hex
+C20C9280 00000001
+3A600044 00000000
+```
+
+Always use Bucket E (0x45)
+
+```hex
+C20C9280 00000001
+3A600045 00000000
+```
+
+### The Actual Algorithm
+
+So what actually happens is that first the game determines what Bucket ID you'll be using[1]. The game then iterates through that list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
+
+Once the swaps are complete, a random capsule is selected from the list. Each capsule in the list at this point has an equal chance of being grabbed.
+
+[1] I have yet to determine this.
