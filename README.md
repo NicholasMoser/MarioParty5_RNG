@@ -180,6 +180,8 @@ So what happens is that first the game determines what Bucket you'll be using. T
 
 The other factor is your current place in the game. First place results in a `current_place` of 0. Second place results in a `current_place` of 1, and so on.
 
+The below image shows what your chances of getting a particular bucket selected are given your `current_place` and `turn_param`. I calculated these values using a script I've included in this repository under [bucket.py](https://github.com/NicholasMoser/MarioParty5_RNG/blob/master/bucket.py)
+
 ![Bucket Percentages](/img/bucket.PNG?raw=true "Bucket Percentages")
 
 Once your set of bucket percentages have been chosen, the game then uses these percentages to randomly select a bucket between them. So for example, if you are in first place and the `turn_param` is 0 (early game), you cannot get any capsules from Bucket E.
