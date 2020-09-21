@@ -176,8 +176,18 @@ C20C9280 00000001
 
 ### The Actual Algorithm
 
-So what actually happens is that first the game determines what Bucket ID you'll be using[1]. The game then iterates through that list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
+So what happens is that first the game determines what Bucket you'll be using. Each bucket has a "base chance" of occurring. These are:
+
+- Bucket A: 70%
+- Bucket B: 15%
+- Bucket C: 15%
+- Bucket D: 0%
+- Bucket E: 0%
+
+The game then may apply modifiers which change these[1]. The game then uses these bucket percentages and chooses a bucket using them.
+
+Then the game iterates through that list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
 
 Once the swaps are complete, a random capsule is selected from the list. Each capsule in the list at this point has an equal chance of being grabbed.
 
-[1] I have yet to determine this.
+[1] I have yet to determine these modifiers.
