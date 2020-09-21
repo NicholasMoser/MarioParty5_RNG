@@ -184,7 +184,9 @@ So what happens is that first the game determines what Bucket you'll be using. E
 - Bucket D: 0%
 - Bucket E: 0%
 
-The game then may apply modifiers which change these. There are two modifiers, which have yet to be identified. They are currently called `iVar1` and `iVar5`. The two result in the following table of percentages:
+The game then may apply modifiers which change these. There are two modifiers, one of which is understood and the other which is not yet understood. The identified modifier is called `turn_param`. This modifier is a number between 0 and 2, calculated as a proportion of the number of turns left compared to the total number of turns. A python script has been included that will return the `turn_param` given the current turn number and total number of turns. You can find it in this repository under `turns.py`.
+
+The other modifier is called `iVar1` which has yet to be identified.
 
 ![Bucket Percentages](/img/bucket.PNG?raw=true "Bucket Percentages")
 
