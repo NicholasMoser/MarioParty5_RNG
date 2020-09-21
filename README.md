@@ -176,22 +176,14 @@ C20C9280 00000001
 
 ### The Actual Algorithm
 
-So what happens is that first the game determines what Bucket you'll be using. Each bucket has a "base chance" of occurring. These are:
+So what happens is that first the game determines what Bucket you'll be using. The Bucket you'll be using depends on two factors. The first I call `turn_param`. This factor is a number between 0 and 2, calculated as a proportion of the number of turns left compared to the total number of turns. A python script has been included that will return the `turn_param` given the current turn number and total number of turns. You can find it in this repository under [turns.py](https://github.com/NicholasMoser/MarioParty5_RNG/blob/master/turns.py)
 
-- Bucket A: 70%
-- Bucket B: 15%
-- Bucket C: 15%
-- Bucket D: 0%
-- Bucket E: 0%
-
-The game then may apply modifiers which change these. There are two modifiers, one of which is understood and the other which is not yet understood. The identified modifier is called `turn_param`. This modifier is a number between 0 and 2, calculated as a proportion of the number of turns left compared to the total number of turns. A python script has been included that will return the `turn_param` given the current turn number and total number of turns. You can find it in this repository under `turns.py`.
-
-The other modifier is called `iVar1` which has yet to be identified.
+The other factor is your current place in the game. First place results in a `current_place` of 0. Second place results in a `current_place` of 1, and so on.
 
 ![Bucket Percentages](/img/bucket.PNG?raw=true "Bucket Percentages")
 
-The game then uses these bucket percentages and chooses a bucket using them.
+Once your set of bucket percentages have been chosen, the game then uses these percentages to randomly select a bucket between them. So for example, if you are in first place and the `turn_param` is 0 (early game), you cannot get any capsules from Bucket E.
 
-Then the game iterates through that list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
+Once your bucket is chosen, the game iterates through the list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
 
 Once the swaps are complete, a random capsule is selected from the list. Each capsule in the list at this point has an equal chance of being grabbed.
