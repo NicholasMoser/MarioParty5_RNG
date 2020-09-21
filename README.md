@@ -184,10 +184,12 @@ So what happens is that first the game determines what Bucket you'll be using. E
 - Bucket D: 0%
 - Bucket E: 0%
 
-The game then may apply modifiers which change these[1]. The game then uses these bucket percentages and chooses a bucket using them.
+The game then may apply modifiers which change these. There are two modifiers, which have yet to be identified. They are currently called `iVar1` and `iVar5`. The two result in the following table of percentages:
+
+![Bucket Percentages](/img/bucket.PNG?raw=true "Bucket Percentages")
+
+The game then uses these bucket percentages and chooses a bucket using them.
 
 Then the game iterates through that list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
 
 Once the swaps are complete, a random capsule is selected from the list. Each capsule in the list at this point has an equal chance of being grabbed.
-
-[1] I have yet to determine these modifiers.
