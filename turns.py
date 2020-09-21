@@ -1,4 +1,3 @@
-# 
 """
 Prints out the turn_param for bucket percentage modifiers. turn_param is calculated
 using a formula of the total number of turns in the game compared to the current turn
@@ -13,11 +12,20 @@ python turns.py 20 5
 """
 import sys
 
+if (len(sys.argv) != 3):
+    print('Please include TOTAL_NUM_OF_TURNS and CURRENT_TURN parameters')
+    sys.exit(1)
+
 TOTAL_NUM_OF_TURNS = int(sys.argv[1])
 CURRENT_TURN = int(sys.argv[2])
-
+    
 DAT_801cb1e4 = [0xa, 0xf, 0x14, 0x19, 0x1e, 0x23, 0x28, 0x2d, 0x32]
 DAT_801cb208 = [0x3, 0x6, 0x5, 0xa, 0x5, 0xf, 0x8, 0x10, 0xa, 0x14, 0xa, 0x14, 0xd, 0x1a, 0xf, 0x1e, 0xf, 0x23]
+
+
+if (TOTAL_NUM_OF_TURNS > 50 or TOTAL_NUM_OF_TURNS < 10):
+    print('TOTAL_NUM_OF_TURNS must be between 10 (inclusive) and 50 (inclusive)')
+    sys.exit(1)
 
 index4 = 0
 while (index4 < 8 and DAT_801cb1e4[index4] < TOTAL_NUM_OF_TURNS):
