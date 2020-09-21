@@ -6,15 +6,15 @@ Digging into how Mario Party 5 handles RNG.
 
 I've found two random functions in the game's code so far. They are similar to the [HSD_Rand](https://github.com/doldecomp/gnt4/blob/master/src/sysdolphin/random.c#L11) and [HSD_Randi](https://github.com/doldecomp/gnt4/blob/master/src/sysdolphin/random.c#L31) functions provided by [sysdolphin](https://wiki.mariocube.com/index.php/Sysdolphin). I've named them `rand` and `randi` respectively.
 
+`rand` returns a random integer. [Source](https://gist.github.com/NicholasMoser/ec152e10388a786d86ec6be85f184b9d)
+
 ![Rand Function](/img/rand.PNG?raw=true "Rand Function")
 
-`rand` returns a random integer. [Source](https://gist.github.com/NicholasMoser/ec152e10388a786d86ec6be85f184b9d)
+`randi` returns a random integer between 0 (inclusive) and `max_value ` (non-inclusive) where `max_value ` is the provided parameter. [Source](https://gist.github.com/NicholasMoser/a17c38d41692364e9cf2e4b86aae1e98)
 
 ![Randi Function](/img/randi.PNG?raw=true "Randi Function")
 
-`randi` returns a random integer between 0 and the parameter provided non-inclusive. [Source](https://gist.github.com/NicholasMoser/a17c38d41692364e9cf2e4b86aae1e98)
-
-Both are definitely a [Linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator). They also appear to be a [Lehmer Random Number Generator](https://en.wikipedia.org/wiki/Lehmer_random_number_generator).
+Both are definitely [Linear congruential generators](https://en.wikipedia.org/wiki/Linear_congruential_generator). They also appear to be [Lehmer Random Number Generators](https://en.wikipedia.org/wiki/Lehmer_random_number_generator).
 
 ## Capsule IDs
 
@@ -86,11 +86,11 @@ The capsules labeled `ERROR CAPSULE (DEBUG)` are capsules used for debugging the
 
 ## Capsule Randomness
 
-When you come to a capsule machine, you get a random capsule. The capsule ID you get is returned from the the result of calling the function `FUN_800c8fa0` at `0x800c0cb0`.
+When you go to a capsule machine in-game you can get a random capsule. The capsule ID you get is returned from the the result of calling the function `FUN_800c8fa0` at `0x800c0cb0`.
 
-I've began documenting the function here: [random_capsule.c](https://gist.github.com/NicholasMoser/02b477cd16e1d5ea1ba6e8c4cea1333e)
+I've documented the function here: [random_capsule.c](https://gist.github.com/NicholasMoser/02b477cd16e1d5ea1ba6e8c4cea1333e)
 
-Capsules in the game are grouped by buckets. Before the game picks which capsule you'll get, it first picks which bucket it will choose from. I've [mapped each capsule to each bucket here](https://gist.github.com/NicholasMoser/5beafc9a00269b64469eb7f176990dbb), but have included a summary of the buckets below:
+Capsules in the game are grouped by what I will refer to as buckets. Before the game picks which capsule you'll get, it first picks which bucket it will choose from. I've [mapped each capsule to each bucket here](https://gist.github.com/NicholasMoser/5beafc9a00269b64469eb7f176990dbb), but have included a summary of the buckets below:
 
 ### Bucket A (0x41)
 
@@ -137,7 +137,7 @@ Capsules in the game are grouped by buckets. Before the game picks which capsule
 
 ### Gecko Codes
 
-To prove the existence of these buckets, you can use the following Gecko codes for a specific Bucket ID to **always** be used:
+To prove the existence of these buckets, you can use the following Gecko codes for a specific bucket to **always** be used:
 
 Always use Bucket A (0x41)
 
@@ -176,15 +176,16 @@ C20C9280 00000001
 
 ### The Actual Algorithm
 
-So what happens is that first the game determines what Bucket you'll be using. The Bucket you'll be using depends on two factors. The first I call `turn_param`. This factor is a number between 0 and 2, calculated as a proportion of the number of turns left compared to the total number of turns. A python script has been included that will return the `turn_param` given the current turn number and total number of turns. You can find it in this repository under [turns.py](https://github.com/NicholasMoser/MarioParty5_RNG/blob/master/turns.py)
+So what happens is that first the game determines what bucket you'll be using. The bucket you'll be using depends on two factors.
 
-The other factor is your current place in the game. First place results in a `current_place` of 0. Second place results in a `current_place` of 1, and so on.
+1. The first I call `turn_param`. This factor is a number between 0 (inclusive) and 2 (inclusive), calculated as a proportion of the number of turns left compared to the total number of turns. The beginning of the game this value will be 0, and near the end of the game it will be 2. A python script has been included that will return the `turn_param` given the current turn number and total number of turns. You can find it in this repository under [turns.py](https://github.com/NicholasMoser/MarioParty5_RNG/blob/master/turns.py)
+2. The second factor is your current place in the game. First place results in a `current_place` of 0. Second place results in a `current_place` of 1, and so on.
 
 The below image shows what your chances of getting a particular bucket selected are given your `current_place` and `turn_param`. I calculated these values using a script I've included in this repository under [bucket.py](https://github.com/NicholasMoser/MarioParty5_RNG/blob/master/bucket.py)
 
 ![Bucket Percentages](/img/bucket.PNG?raw=true "Bucket Percentages")
 
-Once your set of bucket percentages have been chosen, the game then uses these percentages to randomly select a bucket between them. So for example, if you are in first place and the `turn_param` is 0 (early game), you cannot get any capsules from Bucket E.
+Once your set of bucket percentages have been chosen, the game then uses these percentages to randomly select a bucket between them. So for example, at the beginning of the game (`turn_param` = 0) you cannot get any capsules from bucket E no matter what place you're in. By the end of the game (`turn_param` = 2), all players but the player in first place can get a capsule from bucket E.
 
 Once your bucket is chosen, the game iterates through the list of capsules in that bucket **5 times** and swaps the current capsule in the iteration with a random other capsule in the list. It will not swap if the random other capsule happens to match the current capsule. Therefore, anywhere between `0` and `number_of_capsules_in_the_list * 5` swaps will occur.
 
