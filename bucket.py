@@ -1,9 +1,32 @@
-# Begins in memory at 0x801cb0f4 and is around 240 bytes in length
+"""
+Prints out the percentages of each of the five buckets being chosen given
+the current place and turn parameter. The percentages are read from
+bucket_percentages.dat which contains the 240 bytes at 0x801cb0f4 in
+memory.
 
-iVar1 = 0 # Max 3
-iVar5 = 2 # Max 2?
+Usage:
+python bucket.py {CURRENT_PLACE} {TURN_PARAM}
 
-offset = iVar5 * 0x50 + iVar1 * 0x14 # from 0x800c91a8
+Example:
+python bucket.py 1 0
+"""
+import sys
+
+if (len(sys.argv) != 3):
+    print('Please include CURRENT_PLACE and TURN_PARAM parameters')
+    sys.exit(1)
+
+CURRENT_PLACE = int(sys.argv[1])
+TURN_PARAM = int(sys.argv[2])
+
+if (CURRENT_PLACE > 3 or CURRENT_PLACE < 0):
+    print('CURRENT_PLACE must be between 0 (inclusive) and 3 (inclusive)')
+    sys.exit(1)
+elif (TURN_PARAM > 2 or CURRENT_PLACE < 0):
+    print('TURN_PARAM must be between 0 (inclusive) and 2 (inclusive)')
+    sys.exit(1)
+
+offset = TURN_PARAM * 0x50 + CURRENT_PLACE * 0x14 # from 0x800c91a8
 with open("bucket_percentages.dat", "rb") as f:
     print("Offset: 0x{:02X}\n".format(offset))
     f.seek(offset)
